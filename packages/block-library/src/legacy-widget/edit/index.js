@@ -36,6 +36,7 @@ class LegacyWidgetEdit extends Component {
 	constructor() {
 		super( ...arguments );
 		this.state = {
+			hasEditForm: true,
 			isPreview: false,
 		};
 		this.switchToEdit = this.switchToEdit.bind( this );
@@ -54,7 +55,7 @@ class LegacyWidgetEdit extends Component {
 			availableLegacyWidgets,
 			( { isHidden } ) => ! isHidden
 		);
-		const { isPreview } = this.state;
+		const { isPreview, hasEditForm } = this.state;
 		const { identifier, isCallbackWidget } = attributes;
 		const widgetObject = identifier && availableLegacyWidgets[ identifier ];
 		if ( ! widgetObject ) {
@@ -122,7 +123,7 @@ class LegacyWidgetEdit extends Component {
 							icon="update"
 						>
 						</IconButton>
-						{ ! isCallbackWidget && (
+						{ hasEditForm && (
 							<>
 								<Button
 									className={ `components-tab-button ${ ! isPreview ? 'is-active' : '' }` }
@@ -141,21 +142,29 @@ class LegacyWidgetEdit extends Component {
 					</Toolbar>
 				</BlockControls>
 				{ inspectorControls }
-				{ ! isCallbackWidget && (
+				{ hasEditForm && (
 					<LegacyWidgetEditHandler
 						isVisible={ ! isPreview }
 						identifier={ attributes.identifier }
 						instance={ attributes.instance }
+						isCallbackWidget={ isCallbackWidget }
 						onInstanceChange={
-							( newInstance ) => {
-								this.props.setAttributes( {
-									instance: newInstance,
-								} );
+							( newInstance, newHasEditForm ) => {
+								if ( newInstance ) {
+									this.props.setAttributes( {
+										instance: newInstance,
+									} );
+								}
+								if ( newHasEditForm !== this.hasEditForm ) {
+									this.setState( {
+										hasEditForm: newHasEditForm,
+									} );
+								}
 							}
 						}
 					/>
 				) }
-				{ ( isPreview || isCallbackWidget ) && this.renderWidgetPreview() }
+				{ ( isPreview || ! hasEditForm ) && this.renderWidgetPreview() }
 			</>
 		);
 	}
@@ -165,6 +174,9 @@ class LegacyWidgetEdit extends Component {
 		this.props.setAttributes( {
 			instance: {},
 			identifier: undefined,
+		} );
+		this.setState( {
+			hasEditForm: true,
 		} );
 	}
 
