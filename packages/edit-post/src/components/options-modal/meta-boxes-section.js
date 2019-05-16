@@ -25,7 +25,12 @@ export function MetaBoxesSection( { areCustomFieldsRegistered, metaBoxes, ...sec
 
 	return (
 		<Section { ...sectionProps }>
-			{ areCustomFieldsRegistered && <EnableCustomFieldsOption label={ __( 'Custom Fields' ) } /> }
+			{ areCustomFieldsRegistered &&
+				<EnableCustomFieldsOption
+					label={ __( 'Custom Fields (reload required)' ) }
+					onChange={ () => document.getElementById( 'toggle-custom-fields-form' ).submit() }
+				/>
+			}
 			{ map( thirdPartyMetaBoxes, ( { id, title } ) => (
 				<EnablePanelOption key={ id } label={ title } panelName={ `meta-box-${ id }` } />
 			) ) }
