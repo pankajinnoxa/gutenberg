@@ -7,6 +7,8 @@ import {
 	createNewPost,
 	isInDefaultBlock,
 	pressKeyWithModifier,
+	pressKeyTimes,
+	clickBlockToolbarButton,
 } from '@wordpress/e2e-test-utils';
 
 const addThreeParagraphsToNewPost = async () => {
@@ -20,10 +22,17 @@ const addThreeParagraphsToNewPost = async () => {
 	await page.keyboard.press( 'Enter' );
 };
 
-const clickOnBlockSettingsMenuItem = async ( buttonLabel ) => {
-	await expect( page ).toClick( '.block-editor-block-settings-menu__toggle' );
-	const itemButton = ( await page.$x( `//*[contains(@class, "block-editor-block-settings-menu__popover")]//button[contains(text(), '${ buttonLabel }')]` ) )[ 0 ];
-	await itemButton.click();
+/**
+ * Note Puppeteer has a problem clicking on items in the Popover that require
+ * scrolling the Popover to be visible. To work around this we use the keyboard
+ * to select the "Remove Block" button
+ */
+const clickOnBlockSettingsMenuRemoveBlockButton = async () => {
+	await clickBlockToolbarButton( 'More options' );
+
+	await pressKeyTimes( 'Tab', 7 );
+
+	await pressKeyTimes( 'Enter', 1 );
 };
 
 describe( 'block deletion -', () => {
@@ -37,7 +46,8 @@ describe( 'block deletion -', () => {
 			// Press Escape to show the block toolbar
 			await page.keyboard.press( 'Escape' );
 
-			await clickOnBlockSettingsMenuItem( 'Remove Block' );
+			await clickOnBlockSettingsMenuRemoveBlockButton();
+
 			expect( await getEditedPostContent() ).toMatchSnapshot();
 
 			// Type additional text and assert that caret position is correct by comparing to snapshot.
@@ -119,7 +129,7 @@ describe( 'deleting all blocks', () => {
 
 		await page.keyboard.press( 'Escape' );
 
-		await clickOnBlockSettingsMenuItem( 'Remove Block' );
+		await clickOnBlockSettingsMenuRemoveBlockButton();
 
 		// There is a default block:
 		expect( await page.$$( '.block-editor-block-list__block' ) ).toHaveLength( 1 );
