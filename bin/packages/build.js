@@ -28,7 +28,7 @@ if ( ! files.length ) {
 
 	files = glob.sync( [
 		`${ PACKAGES_DIR }/*/src/**/*.js`,
-		`${ PACKAGES_DIR }/*/*.scss`,
+		`${ PACKAGES_DIR }/*/src/*.scss`,
 	], {
 		ignore: [
 			`**/test/**`,
