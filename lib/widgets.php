@@ -23,6 +23,9 @@ add_action( 'admin_print_styles', 'gutenberg_block_editor_admin_print_styles' );
  * screen.
  */
 function gutenberg_block_editor_admin_print_scripts() {
+	echo '<form method="post">';
+	echo wp_nonce_field( 'save-sidebar-widgets', '_wpnonce_widgets', false );
+	echo '</form>';
 	if ( get_current_screen()->is_block_editor() ) {
 		// phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 		do_action( 'admin_print_scripts-widgets.php' );
@@ -101,7 +104,7 @@ function gutenberg_legacy_widget_settings( $settings ) {
 				html_entity_decode( $widget_obj->widget_options['description'] ) :
 				null,
 			'isCallbackWidget' => false,
-			'isHidden'         => in_array( $class, $core_widgets, true ),
+			'isHidden'         => false,
 		);
 	}
 	foreach ( $wp_registered_widgets as $widget_id => $widget_obj ) {
@@ -180,3 +183,8 @@ function gutenberg_create_wp_area_post_type() {
 	);
 }
 add_action( 'init', 'gutenberg_create_wp_area_post_type' );
+
+function gutenberg_enqueue_widget_scripts(){
+	wp_enqueue_script( 'admin-widgets' );
+}
+add_action( 'enqueue_block_editor_assets', 'gutenberg_enqueue_widget_scripts' );

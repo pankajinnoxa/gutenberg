@@ -56,9 +56,9 @@ class LegacyWidgetEdit extends Component {
 			( { isHidden } ) => ! isHidden
 		);
 		const { isPreview, hasEditForm } = this.state;
-		const { identifier, isCallbackWidget } = attributes;
+		const { identifier, widgetClass } = attributes;
 		const widgetObject = identifier && availableLegacyWidgets[ identifier ];
-		if ( ! widgetObject ) {
+		if ( ! identifier && ! widgetClass ) {
 			let placeholderContent;
 
 			if ( ! hasPermissionsToManageWidgets ) {
@@ -70,11 +70,14 @@ class LegacyWidgetEdit extends Component {
 					<SelectControl
 						label={ __( 'Select a legacy widget to display:' ) }
 						value={ identifier || 'none' }
-						onChange={ ( value ) => setAttributes( {
-							instance: {},
-							identifier: value,
-							isCallbackWidget: availableLegacyWidgets[ value ].isCallbackWidget,
-						} ) }
+						onChange={ ( value ) => {
+							const { isCallbackWidget } = visibleLegacyWidgets[ value ];
+							setAttributes( {
+								instance: {},
+								identifier: isCallbackWidget ? value : undefined,
+								widgetClass: isCallbackWidget ? undefined : value,
+							} );
+						} }
 						options={ [ { value: 'none', label: 'Select widget' } ].concat(
 							map( visibleLegacyWidgets, ( widget, key ) => {
 								return {
@@ -97,13 +100,13 @@ class LegacyWidgetEdit extends Component {
 			);
 		}
 
-		const inspectorControls = (
+		const inspectorControls = widgetObject ? (
 			<InspectorControls>
 				<PanelBody title={ widgetObject.name }>
 					{ widgetObject.description }
 				</PanelBody>
 			</InspectorControls>
-		);
+		) : null;
 		if ( ! hasPermissionsToManageWidgets ) {
 			return (
 				<>
@@ -146,8 +149,8 @@ class LegacyWidgetEdit extends Component {
 					<LegacyWidgetEditHandler
 						isVisible={ ! isPreview }
 						identifier={ attributes.identifier }
+						widgetClass={ attributes.widgetClass }
 						instance={ attributes.instance }
-						isCallbackWidget={ isCallbackWidget }
 						onInstanceChange={
 							( newInstance, newHasEditForm ) => {
 								if ( newInstance ) {
@@ -174,6 +177,7 @@ class LegacyWidgetEdit extends Component {
 		this.props.setAttributes( {
 			instance: {},
 			identifier: undefined,
+			widgetClass: undefined,
 		} );
 		this.setState( {
 			hasEditForm: true,
